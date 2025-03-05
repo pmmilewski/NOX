@@ -105,6 +105,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>wwise;imgui;imgui\backends;%VULKAN_SDK%\include;imgui\libs\glfw\include;%WWISESDK%\include;wwise\SoundEngine\Win32;wwise\SoundEngine\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,6 +139,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="NOX.cpp" />
+    <ClCompile Include="source\VulkanRenderer.cpp" />
     <ClCompile Include="source\WwiseIntegration.cpp" />
     <ClCompile Include="wwise\SoundEngine\Common\AkDefaultLowLevelIODispatcher.cpp" />
     <ClCompile Include="wwise\SoundEngine\Common\AkFileLocationBase.cpp" />
@@ -156,6 +158,8 @@
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="source\commonVk.h" />
+    <ClInclude Include="source\VulkanRenderer.h" />
     <ClInclude Include="source\WwiseIntegration.h" />
     <ClInclude Include="wwise\SoundEngine\Common\AkDefaultLowLevelIODispatcher.h" />
     <ClInclude Include="wwise\SoundEngine\Common\AkFileHelpersBase.h" />
@@ -176,6 +180,11 @@
   <ItemGroup>
     <Content Include="imgui\misc\imgui.gdb" />
     <Content Include="imgui\misc\imgui.natstepfilter" />
+    <Content Include="source\shaders\frag.spv" />
+    <Content Include="source\shaders\shader.frag" />
+    <Content Include="source\shaders\shader.vert" />
+    <Content Include="source\shaders\shader_compile.bat" />
+    <Content Include="source\shaders\vert.spv" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="imgui\misc\imgui.natvis" />
