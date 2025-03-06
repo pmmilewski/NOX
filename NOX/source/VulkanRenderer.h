@@ -39,6 +39,13 @@ struct Vertex
 	}
 };
 
+struct UniformBufferObject
+{
+	alignas(16) glm::mat4 model;
+	alignas(16) glm::mat4 view;
+	alignas(16) glm::mat4 proj;
+};
+
 static void checkVkResult(VkResult err);
 
 struct QueueFamilyIndices
@@ -72,6 +79,7 @@ private:
 	GLFWwindow* window = nullptr;
 
 	VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
+	std::vector<VkDescriptorSet> descriptorSets;
 	VkAllocationCallbacks* allocator = VK_NULL_HANDLE;
 	VkInstance instance = VK_NULL_HANDLE;
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
@@ -80,6 +88,7 @@ private:
 	VkQueue presentQueue = VK_NULL_HANDLE;
 	VkSurfaceKHR surface = VK_NULL_HANDLE;
 	VkRenderPass renderPass = VK_NULL_HANDLE;
+	VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
 	VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
 	VkPipeline graphicsPipeline = VK_NULL_HANDLE;
 	VkPipelineCache graphicsPipelineCache = VK_NULL_HANDLE;
@@ -91,6 +100,9 @@ private:
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;
+	std::vector<VkBuffer> uniformBuffers;
+	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	std::vector<void*> uniformBuffersMapped;
 	VkDeviceMemory indexBufferMemory;
 	std::vector<VkCommandBuffer> commandBuffers;
 	VkFormat swapChainImageFormat;
@@ -166,8 +178,11 @@ public:
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void createVertexBuffer();
 	void createIndexBuffer();
+	void createUniformBuffers();
 	void createGraphicsPipeline();
+	void createDescriptorSetLayout();
 	void createDescriptorPool();
+	void createDescriptorSets();
 	void createRenderPass();
 
 	void createFramebuffers();
@@ -178,6 +193,7 @@ public:
 
 	void createSyncObjects();
 
+	void updateUniformBuffer(uint32_t imageIndex);
 	void drawFrame();
 
 	void cleanup();
