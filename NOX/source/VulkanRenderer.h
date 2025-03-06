@@ -90,6 +90,8 @@ private:
 	VkCommandPool commandPool;
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
+	VkBuffer indexBuffer;
+	VkDeviceMemory indexBufferMemory;
 	std::vector<VkCommandBuffer> commandBuffers;
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
@@ -163,6 +165,7 @@ public:
 		VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	void createVertexBuffer();
+	void createIndexBuffer();
 	void createGraphicsPipeline();
 	void createDescriptorPool();
 	void createRenderPass();
