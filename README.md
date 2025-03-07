@@ -1,1 +1,1 @@
-Training project created to play with Wwise, imGUI, Vulkan and other APIs and ideas.
+Training project created to play with Wwise, imGUI, Vulkan and other APIs and ideas. Started from scratch.
