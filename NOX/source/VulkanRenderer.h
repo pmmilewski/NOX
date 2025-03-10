@@ -9,7 +9,7 @@ constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
 struct Vertex
 {
-	glm::vec2 pos;
+	glm::vec3 pos;
 	glm::vec3 color;
 	glm::vec2 texCoord;
 
@@ -28,7 +28,7 @@ struct Vertex
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
-		attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
 		attributeDescriptions[1].binding = 0;
@@ -84,6 +84,9 @@ private:
 
 	GLFWwindow* window = nullptr;
 
+	VkImage depthImage;
+	VkDeviceMemory depthImageMemory;
+	VkImageView depthImageView;
 	VkImage textureImage;
 	VkDeviceMemory textureImageMemory;
 	VkImageView textureImageView;
@@ -151,9 +154,10 @@ public:
 
 	void initWindow();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
-	VkImageView createImageView(VkImage image, VkFormat format);
+	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 	void createTextureImageView();
 	void createTextureSampler();
+	void createDepthResources();
 	void initVulkan();
 	void createInstance();
 	void setupDebugMessenger();
@@ -226,5 +230,7 @@ public:
 	void setupImGuiBackends();
 
 	uint32_t findMemoryType(uint32_t typeBits, VkMemoryPropertyFlags properties) const;
-	
+	VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) const;
+	VkFormat findDepthFormat() const;
+	bool hasStencilComponent(VkFormat format) const;
 };
