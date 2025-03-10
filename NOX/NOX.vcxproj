@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>wwise;imgui;imgui\backends;%VULKAN_SDK%\include;imgui\libs\glfw\include;%WWISESDK%\include;wwise\SoundEngine\Win32;wwise\SoundEngine\Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>wwise;imgui;imgui\backends;%VULKAN_SDK%\include;imgui\libs\glfw\include;%WWISESDK%\include;wwise\SoundEngine\Win32;wwise\SoundEngine\Common;stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
@@ -161,6 +161,7 @@
     <ClInclude Include="source\commonVk.h" />
     <ClInclude Include="source\VulkanRenderer.h" />
     <ClInclude Include="source\WwiseIntegration.h" />
+    <ClInclude Include="stb\stb_image.h" />
     <ClInclude Include="wwise\SoundEngine\Common\AkDefaultLowLevelIODispatcher.h" />
     <ClInclude Include="wwise\SoundEngine\Common\AkFileHelpersBase.h" />
     <ClInclude Include="wwise\SoundEngine\Common\AkFileLocationBase.h" />
@@ -185,6 +186,7 @@
     <Content Include="source\shaders\shader.vert" />
     <Content Include="source\shaders\shader_compile.bat" />
     <Content Include="source\shaders\vert.spv" />
+    <Content Include="source\textures\texture.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="imgui\misc\imgui.natvis" />

@@ -11,6 +11,7 @@ struct Vertex
 {
 	glm::vec2 pos;
 	glm::vec3 color;
+	glm::vec2 texCoord;
 
 	static auto getBindingDescription()
 	{
@@ -23,7 +24,7 @@ struct Vertex
 
 	static auto getAttributeDescriptions()
 	{
-		std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions;
+		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions;
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
@@ -34,6 +35,11 @@ struct Vertex
 		attributeDescriptions[1].location = 1;
 		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+		attributeDescriptions[2].binding = 0;
+		attributeDescriptions[2].location = 2;
+		attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
 
 		return attributeDescriptions;
 	}
@@ -78,6 +84,10 @@ private:
 
 	GLFWwindow* window = nullptr;
 
+	VkImage textureImage;
+	VkDeviceMemory textureImageMemory;
+	VkImageView textureImageView;
+	VkSampler textureSampler;
 	VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
 	std::vector<VkDescriptorSet> descriptorSets;
 	VkAllocationCallbacks* allocator = VK_NULL_HANDLE;
@@ -141,6 +151,9 @@ public:
 
 	void initWindow();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+	VkImageView createImageView(VkImage image, VkFormat format);
+	void createTextureImageView();
+	void createTextureSampler();
 	void initVulkan();
 	void createInstance();
 	void setupDebugMessenger();
@@ -175,7 +188,14 @@ public:
 	VkShaderModule createShaderModule(const std::vector<char>& code);
 	void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
 		VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+	void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+	VkCommandBuffer beginSingleTimeCommands();
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling,
+		VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+	void createTextureImage();
 	void createVertexBuffer();
 	void createIndexBuffer();
 	void createUniformBuffers();
