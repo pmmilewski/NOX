@@ -1,14 +1,67 @@
 #include "source/VulkanRenderer.h"
 #include "source/WwiseIntegration.h"
+#include "source/Camera.h"
 
 static VulkanRenderer g_Renderer;
 static WwiseIntegration g_SoundEngine;
+
+auto camera = Camera(0.0f, 0.0f, 5.0f);
+
+float deltaTime{};
+std::chrono::time_point<std::chrono::steady_clock> lastFrame {};
+
+bool firstMouse = true;
+float lastX = 400, lastY = 300;
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+    
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos;
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.RotateCamera(xoffset, yoffset, deltaTime);
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    camera.ZoomCamera(yoffset, deltaTime);
+}
+
+void processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    
+    glm::vec3 cameraMovement(0.0f, 0.0f, 0.0f);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraMovement.x += 1.0f;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraMovement.x -= 1.0f;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraMovement.y -= 1.0f;;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraMovement.y += 1.0f;
+
+    camera.MoveCamera(cameraMovement, deltaTime);
+}
 
 // Main code
 int main(int, char**)
 {
     g_Renderer.initWindow();
     g_Renderer.initVulkan();
+
+    glfwSetCursorPosCallback(g_Renderer.getWindow(), mouse_callback);
+    glfwSetScrollCallback(g_Renderer.getWindow(), scroll_callback);
+    glfwSetInputMode(g_Renderer.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -36,18 +89,23 @@ int main(int, char**)
     // Main loop
     while (!glfwWindowShouldClose(g_Renderer.getWindow()))
     {
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        deltaTime = std::chrono::duration<float>(currentTime - lastFrame).count();
+        lastFrame = currentTime;
         // Poll and handle events (inputs, window resize, etc.)
         // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
         // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
         // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
+        processInput(g_Renderer.getWindow());
 
         // Start the Dear ImGui frame
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+#if 0
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
@@ -88,9 +146,9 @@ int main(int, char**)
                 show_another_window = false;
             ImGui::End();
         }
-
+#endif
         ImGui::Render();
-        g_Renderer.drawFrame();
+        g_Renderer.drawFrame(camera.GetCameraMatrix());
         g_SoundEngine.RenderAudio();
     }
 

@@ -148,10 +148,6 @@ private:
 
 
 public:
-	void run();
-
-	void mainLoop();
-
 	void initWindow();
 	static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
@@ -217,8 +213,8 @@ public:
 
 	void createSyncObjects();
 
-	void updateUniformBuffer(uint32_t imageIndex);
-	void drawFrame();
+	void updateUniformBuffer(uint32_t imageIndex, const glm::mat4& view);
+	void drawFrame(const glm::mat4& view);
 
 	void cleanup();
 

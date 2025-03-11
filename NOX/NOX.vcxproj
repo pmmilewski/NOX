@@ -139,6 +139,8 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="NOX.cpp" />
+    <ClCompile Include="source\Camera.cpp" />
+    <ClCompile Include="source\FPSCamera.cpp" />
     <ClCompile Include="source\VulkanRenderer.cpp" />
     <ClCompile Include="source\WwiseIntegration.cpp" />
     <ClCompile Include="wwise\SoundEngine\Common\AkDefaultLowLevelIODispatcher.cpp" />
@@ -158,7 +160,9 @@
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\commonVk.h" />
+    <ClInclude Include="source\FPSCamera.h" />
     <ClInclude Include="source\VulkanRenderer.h" />
     <ClInclude Include="source\WwiseIntegration.h" />
     <ClInclude Include="stb\stb_image.h" />

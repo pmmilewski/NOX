@@ -74,15 +74,6 @@ static std::vector<char> readFile(const std::string& filename)
 	return buffer;
 }
 
-
-void VulkanRenderer::run()
-{
-	initWindow();
-	initVulkan();
-	mainLoop();
-	cleanup();
-}
-
 VKAPI_ATTR VkBool32 VKAPI_CALL VulkanRenderer::debugCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, 
 	VkDebugUtilsMessageTypeFlagsEXT messageType, 
@@ -903,7 +894,7 @@ void VulkanRenderer::createSyncObjects()
 	}
 }
 
-void VulkanRenderer::updateUniformBuffer(uint32_t imageIndex)
+void VulkanRenderer::updateUniformBuffer(uint32_t imageIndex, const glm::mat4& view)
 {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -911,14 +902,14 @@ void VulkanRenderer::updateUniformBuffer(uint32_t imageIndex)
 
 	UniformBufferObject ubo{};
 	ubo.model = glm::rotate(glm::mat4(1.0f), deltaTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = view;//glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / static_cast<float>(swapChainExtent.height), 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1.0f; // inverting to compensate existing OpenGL Y flip (GLM)
 
 	memcpy(uniformBuffersMapped[imageIndex], &ubo, sizeof(ubo));
 }
 
-void VulkanRenderer::drawFrame()
+void VulkanRenderer::drawFrame(const glm::mat4& view)
 {
 	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -937,7 +928,7 @@ void VulkanRenderer::drawFrame()
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
-	updateUniformBuffer(static_cast<uint32_t>(currentFrame));
+	updateUniformBuffer(static_cast<uint32_t>(currentFrame), view);
 	
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1674,17 +1665,6 @@ void VulkanRenderer::deviceWaitIdle()
 {
 	VkResult result = vkDeviceWaitIdle(device);
 	checkVkResult(result);
-}
-
-void VulkanRenderer::mainLoop()
-{
-	while (!glfwWindowShouldClose(window))
-	{
-		glfwPollEvents();
-		drawFrame();
-	}
-
-	deviceWaitIdle();
 }
 
 void VulkanRenderer::cleanup()
