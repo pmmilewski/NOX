@@ -23,6 +23,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debug_report(VkDebugReportFlagsEXT flags, 
 }
 #endif // APP_USE_VULKAN_DEBUG_REPORT
 
+
 //Proxy function for loading extension function
 VkResult CreateDebugUtilsMessengerEXT(
 	VkInstance instance,
@@ -334,7 +335,7 @@ void VulkanRenderer::createImage(uint32_t width, uint32_t height, VkFormat forma
 void VulkanRenderer::createTextureImage()
 {
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load("source/textures/texture.jpg", &texWidth, &texHeight, &texChannels,
+	stbi_uc* pixels = stbi_load("source/textures/textureX.jpg", &texWidth, &texHeight, &texChannels,
 		STBI_rgb_alpha);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
@@ -368,26 +369,9 @@ void VulkanRenderer::createTextureImage()
 	vkFreeMemory(device, stagingBufferMemory, allocator);
 }
 
-const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-	{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-	{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
-
-	{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-	{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-	{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-	{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
-};
-
-const std::vector<uint16_t> indices = {
-	0, 1, 2, 2, 3, 0,
-	4, 5, 6, 6, 7, 4
-};
-
 void VulkanRenderer::createVertexBuffer()
 {
-	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	VkDeviceSize bufferSize = sizeof(staticObjectsVertices[0]) * staticObjectsVertices.size();
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -396,7 +380,7 @@ void VulkanRenderer::createVertexBuffer()
 
 	void* data;
 	vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, vertices.data(), bufferSize);
+	memcpy(data, staticObjectsVertices.data(), bufferSize);
 	vkUnmapMemory(device, stagingBufferMemory);
 
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
@@ -410,7 +394,7 @@ void VulkanRenderer::createVertexBuffer()
 
 void VulkanRenderer::createIndexBuffer()
 {
-	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+	VkDeviceSize bufferSize = sizeof(staticObjectsIndices[0]) * staticObjectsIndices.size();
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
@@ -420,7 +404,7 @@ void VulkanRenderer::createIndexBuffer()
 
 	void* data;
 	vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, indices.data(), bufferSize);
+	memcpy(data, staticObjectsIndices.data(), bufferSize);
 	vkUnmapMemory(device, stagingBufferMemory);
 
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
@@ -820,7 +804,7 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 	renderPassInfo.renderArea.extent = swapChainExtent;
 
 	std::array<VkClearValue, 2> clearValues{};
-	clearValues[0].color = {0.0f, 0.0f, 0.0f, 1.0f};
+	clearValues[0].color = {0.117f, 0.5625f, 1.0f, 1.0f};
 	clearValues[1].depthStencil = {1.0f, 0};
 	
 	renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -848,10 +832,9 @@ void VulkanRenderer::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t
 	VkDeviceSize offsets[] = {0};
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 	vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
-	//vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
-	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+
+	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(staticObjectsIndices.size()), 1, 0, 0, 0);
 	
 	///////// Imgui draws
 	ImDrawData* draw_data = ImGui::GetDrawData();
@@ -894,22 +877,22 @@ void VulkanRenderer::createSyncObjects()
 	}
 }
 
-void VulkanRenderer::updateUniformBuffer(uint32_t imageIndex, const glm::mat4& view)
+void VulkanRenderer::updateUniformBuffer(uint32_t imageIndex) const
 {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	auto deltaTime = std::chrono::duration<float>(currentTime - startTime).count();
 
 	UniformBufferObject ubo{};
-	ubo.model = glm::rotate(glm::mat4(1.0f), deltaTime * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.view = view;//glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-	ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / static_cast<float>(swapChainExtent.height), 0.1f, 10.0f);
+	ubo.model = glm::mat4(1.0f);
+	ubo.view = viewMatrix;
+	ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / static_cast<float>(swapChainExtent.height), 0.1f, 100.0f);
 	ubo.proj[1][1] *= -1.0f; // inverting to compensate existing OpenGL Y flip (GLM)
 
 	memcpy(uniformBuffersMapped[imageIndex], &ubo, sizeof(ubo));
 }
 
-void VulkanRenderer::drawFrame(const glm::mat4& view)
+void VulkanRenderer::drawFrame()
 {
 	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -928,7 +911,7 @@ void VulkanRenderer::drawFrame(const glm::mat4& view)
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
     recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
 
-	updateUniformBuffer(static_cast<uint32_t>(currentFrame), view);
+	updateUniformBuffer(static_cast<uint32_t>(currentFrame));
 	
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1057,6 +1040,88 @@ void VulkanRenderer::createDepthResources()
 	depthImageView = createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 	transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 	
+}
+
+void VulkanRenderer::createStaticGameObjectsData()
+{
+	uint32_t requiredIndices{0};
+	uint32_t requiredVertices{0};
+	
+	if (currentSceneObjects)
+	{
+		for (auto object : *currentSceneObjects)
+		{
+			if (object.GetMobility() != GameObjectMobility::Static)
+			{
+				continue;
+			}
+			
+			if (object.GetPrimitive() == GameObjectGeoPrimitive::Plane)
+			{
+				requiredIndices += planeIndices;
+				requiredVertices += planeVertices;
+			}
+			else if (object.GetPrimitive() == GameObjectGeoPrimitive::Cube)
+			{
+				requiredIndices += cubeIndices;
+				requiredVertices += cubeVertices;
+			}
+		}
+	}
+
+	staticObjectsIndices.resize(requiredIndices);
+	staticObjectsVertices.resize(requiredVertices);
+
+	if (currentSceneObjects)
+	{
+		uint16_t indexOffset{0};
+		uint16_t vertexOffset{0};
+		
+		for (auto object : *currentSceneObjects)
+		{
+			if (object.GetMobility() != GameObjectMobility::Static)
+			{
+				continue;
+			}
+			
+			if (object.GetPrimitive() == GameObjectGeoPrimitive::Plane)
+			{
+				for (int i = 0; i < planeIndices; ++i)
+				{
+					staticObjectsIndices[i + indexOffset] = indices[i] + vertexOffset;
+				}
+				indexOffset += planeIndices;
+
+				for (int i = 0; i < planeVertices; ++i)
+				{
+					Vertex vertex = vertices[i];
+					glm::vec4 pos = {vertex.pos, 1.0f};
+					vertex.pos = glm::vec3(object.GetTransform() * pos);
+					vertex.color = object.GetColor();
+					staticObjectsVertices[i + vertexOffset] = vertex;
+				}
+				vertexOffset += planeVertices;
+			}
+			else if (object.GetPrimitive() == GameObjectGeoPrimitive::Cube)
+			{
+				for (int i = 0; i < cubeIndices; ++i)
+				{
+					staticObjectsIndices[i + indexOffset] = indices[i] + vertexOffset;
+				}
+				indexOffset += cubeIndices;
+
+				for (int i = 0; i < cubeVertices; ++i)
+				{
+					Vertex vertex = vertices[i];
+					glm::vec4 pos = {vertex.pos, 1.0f};
+					vertex.pos = glm::vec3(object.GetTransform() * pos);
+					vertex.color = object.GetColor();
+					staticObjectsVertices[i + vertexOffset] = vertex;
+				}
+				vertexOffset += cubeVertices;
+			}
+		}
+	}
 }
 
 
@@ -1208,6 +1273,7 @@ void VulkanRenderer::initVulkan()
 	createTextureImage();
 	createTextureImageView();
 	createTextureSampler();
+	createStaticGameObjectsData();
 	createVertexBuffer();
 	createIndexBuffer();
 	createUniformBuffers();

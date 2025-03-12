@@ -1,11 +1,13 @@
 #include "source/VulkanRenderer.h"
 #include "source/WwiseIntegration.h"
-#include "source/Camera.h"
+#include "source/FPSCamera.h"
+#include "source/RoomAcoustics.h"
 
 static VulkanRenderer g_Renderer;
 static WwiseIntegration g_SoundEngine;
 
-auto camera = Camera(0.0f, 0.0f, 5.0f);
+auto camera = FPSCamera(0.5f, 0.5f, 2.0f);
+static auto cameraView = camera.GetCameraMatrix();
 
 float deltaTime{};
 std::chrono::time_point<std::chrono::steady_clock> lastFrame {};
@@ -56,6 +58,10 @@ void processInput(GLFWwindow* window)
 // Main code
 int main(int, char**)
 {
+    RoomAcoustics roomAcoustics;
+    roomAcoustics.PopulateScene();
+    g_Renderer.SetCurrentScene(roomAcoustics.GetSceneObjects());
+    
     g_Renderer.initWindow();
     g_Renderer.initVulkan();
 
@@ -148,7 +154,8 @@ int main(int, char**)
         }
 #endif
         ImGui::Render();
-        g_Renderer.drawFrame(camera.GetCameraMatrix());
+        g_Renderer.SetViewMatrix(camera.GetCameraMatrix());
+        g_Renderer.drawFrame();
         g_SoundEngine.RenderAudio();
     }
 

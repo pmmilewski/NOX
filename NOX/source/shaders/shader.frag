@@ -10,7 +10,7 @@ layout(location = 0) out vec4 outColor;
 
 void main()
 {
-	outColor = texture(texSampler, fragTexCoord);
-	//outColor = texture(texSampler, fragTexCoord * 2.0);
-	//outColor = vec4(fragColor * texture(texSampler, fragTexCoord).rgb, 1.0);
+	outColor = vec4(fragColor * ((fragTexCoord.x + fragTexCoord.y)/2.0), 1.0);
+	//outColor = texture(texSampler, fragTexCoord);
+	//outColor = vec4(fragColor*texture(texSampler, fragTexCoord).rgb, 1.0);
 }

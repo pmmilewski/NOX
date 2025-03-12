@@ -141,6 +141,8 @@
     <ClCompile Include="NOX.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\FPSCamera.cpp" />
+    <ClCompile Include="source\GameObject.cpp" />
+    <ClCompile Include="source\RoomAcoustics.cpp" />
     <ClCompile Include="source\VulkanRenderer.cpp" />
     <ClCompile Include="source\WwiseIntegration.cpp" />
     <ClCompile Include="wwise\SoundEngine\Common\AkDefaultLowLevelIODispatcher.cpp" />
@@ -163,6 +165,8 @@
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\commonVk.h" />
     <ClInclude Include="source\FPSCamera.h" />
+    <ClInclude Include="source\GameObject.h" />
+    <ClInclude Include="source\RoomAcoustics.h" />
     <ClInclude Include="source\VulkanRenderer.h" />
     <ClInclude Include="source\WwiseIntegration.h" />
     <ClInclude Include="stb\stb_image.h" />
