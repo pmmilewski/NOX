@@ -194,7 +194,9 @@
     <Content Include="source\shaders\shader.vert" />
     <Content Include="source\shaders\shader_compile.bat" />
     <Content Include="source\shaders\vert.spv" />
+    <Content Include="source\textures\Checkerboard2.jpg" />
     <Content Include="source\textures\texture.jpg" />
+    <Content Include="source\textures\textureX.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="imgui\misc\imgui.natvis" />

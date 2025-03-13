@@ -335,7 +335,7 @@ void VulkanRenderer::createImage(uint32_t width, uint32_t height, VkFormat forma
 void VulkanRenderer::createTextureImage()
 {
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load("source/textures/textureX.jpg", &texWidth, &texHeight, &texChannels,
+	stbi_uc* pixels = stbi_load("source/textures/Checkerboard2.jpg", &texWidth, &texHeight, &texChannels,
 		STBI_rgb_alpha);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
@@ -1098,6 +1098,7 @@ void VulkanRenderer::createStaticGameObjectsData()
 					glm::vec4 pos = {vertex.pos, 1.0f};
 					vertex.pos = glm::vec3(object.GetTransform() * pos);
 					vertex.color = object.GetColor();
+					vertex.texCoord *= object.GetTexCoordScale();
 					staticObjectsVertices[i + vertexOffset] = vertex;
 				}
 				vertexOffset += planeVertices;
@@ -1116,6 +1117,7 @@ void VulkanRenderer::createStaticGameObjectsData()
 					glm::vec4 pos = {vertex.pos, 1.0f};
 					vertex.pos = glm::vec3(object.GetTransform() * pos);
 					vertex.color = object.GetColor();
+					vertex.texCoord *= object.GetTexCoordScale();
 					staticObjectsVertices[i + vertexOffset] = vertex;
 				}
 				vertexOffset += cubeVertices;

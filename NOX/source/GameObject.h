@@ -21,6 +21,7 @@ private:
     GameObjectGeoPrimitive primitive = {GameObjectGeoPrimitive::None};
     GameObjectMobility mobility = {GameObjectMobility::Static};
     glm::vec3 color = glm::vec3(1.0f);
+    glm::vec2 texCoordScale = {1.0f, 1.0f};
 
 public:
     GameObject() = default;
@@ -29,5 +30,7 @@ public:
     auto GetPrimitive() const { return primitive; }
     auto GetMobility() const { return mobility; }
     void SetColor(glm::vec3 color) { this->color = color; }
-    glm::vec3 GetColor() const { return color; }
+    void SetTexCoordScale(glm::vec2 scale) { texCoordScale = scale; }
+    auto GetTexCoordScale() const { return texCoordScale; }
+    auto GetColor() const { return color; }
 };
