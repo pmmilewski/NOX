@@ -1,5 +1,7 @@
 #include "Camera.h"
 
+#include <AK/SoundEngine/Common/AkSoundEngine.h>
+
 #include "glm/ext/matrix_transform.hpp"
 
 void Camera::UpdateCameraState()
@@ -15,6 +17,15 @@ void Camera::UpdateCameraState()
     Up    = glm::normalize(glm::cross(Right, Front));
     
     View = glm::lookAt(Position, Position + Front, Up);
+
+    if (DefaultListener != AK_INVALID_GAME_OBJECT)
+    {
+        AkSoundPosition ListenerPosition;
+        ListenerPosition.Set(Position.x, Position.y, -Position.z,
+            Front.x, Front.y, -Front.z,
+            Up.x, Up.y, -Up.z);
+        AK::SoundEngine::SetPosition(DefaultListener, ListenerPosition);
+    }
 }
 
 Camera::Camera(glm::vec3 pos, glm::vec3 up, float yaw, float pitch) :
@@ -28,6 +39,7 @@ Camera::Camera(glm::vec3 pos, glm::vec3 up, float yaw, float pitch) :
     WorldUp = up;
     Yaw = yaw;
     Pitch = pitch;
+    
     UpdateCameraState();
 }
 
@@ -42,7 +54,13 @@ ZoomSpeed(ZOOM_SPEED)
     WorldUp = glm::vec3(upX, upY, upZ);
     Yaw = yaw;
     Pitch = pitch;
+    
     UpdateCameraState();
+}
+
+Camera::~Camera()
+{
+    AK::SoundEngine::UnregisterGameObj(DefaultListener);
 }
 
 glm::mat4 Camera::GetCameraMatrix() const
@@ -110,4 +128,13 @@ void Camera::SetRotationSpeed(float newValue)
 void Camera::SetZoomSpeed(float newValue)
 {
     ZoomSpeed = newValue;
+}
+
+void Camera::CreateListener()
+{
+    DefaultListener = WwiseIntegration::GetGameObjectId();
+    AK::SoundEngine::RegisterGameObj(DefaultListener, "Default Listener");
+    AK::SoundEngine::SetDefaultListeners(&DefaultListener, 1);
+
+    UpdateCameraState();
 }

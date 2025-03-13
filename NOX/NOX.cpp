@@ -4,9 +4,9 @@
 #include "source/RoomAcoustics.h"
 
 static VulkanRenderer g_Renderer;
-static WwiseIntegration g_SoundEngine;
+using SoundEngine = WwiseIntegration;
 
-auto camera = FPSCamera(0.5f, 0.5f, 2.0f);
+auto camera = FPSCamera(0.0f, 1.75f, 3.0f);
 static auto cameraView = camera.GetCameraMatrix();
 
 float deltaTime{};
@@ -58,6 +58,11 @@ void processInput(GLFWwindow* window)
 // Main code
 int main(int, char**)
 {
+    // Initializing WWise
+    SoundEngine::InitWwise();
+    SoundEngine::InitWwiseComm();
+    camera.CreateListener();
+    
     RoomAcoustics roomAcoustics;
     roomAcoustics.PopulateScene();
     g_Renderer.SetCurrentScene(roomAcoustics.GetSceneObjects());
@@ -67,7 +72,7 @@ int main(int, char**)
 
     glfwSetCursorPosCallback(g_Renderer.getWindow(), mouse_callback);
     glfwSetScrollCallback(g_Renderer.getWindow(), scroll_callback);
-    glfwSetInputMode(g_Renderer.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(g_Renderer.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -87,11 +92,7 @@ int main(int, char**)
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    // Initializing WWise
-    g_SoundEngine.InitWwise();
-    g_SoundEngine.InitWwiseComm();
-
+    
     // Main loop
     while (!glfwWindowShouldClose(g_Renderer.getWindow()))
     {
@@ -111,15 +112,17 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-#if 0
+
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
-            static float f = 0.0f;
-            static int counter = 0;
+            static float f = 1000.0f;
+            static bool tone = false;
+            static bool testsignal = true;
+            AkGameObjectID sourceID = roomAcoustics.GetSceneObjects().back().GetSoundObject();
 
             ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
 
@@ -127,22 +130,58 @@ int main(int, char**)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
             ImGui::Checkbox("Another Window", &show_another_window);
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            bool changed = ImGui::InputFloat("Frequency", &f);
+            //ImGui::SliderFloat("float", &f, 0.0f, 20000.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            if (tone && changed)
             {
-                g_SoundEngine.PlayEvent();
-                counter++;
+                SoundEngine::SetParameter(sourceID, "TestToneFreq", f);
+            }
+
+            if (ImGui::Button("Pink Noise"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            {
+                SoundEngine::SetState("TestSignal", "Pink");
+                SoundEngine::PostEvent(sourceID, "Stop_TestSignal");
+                SoundEngine::PostEvent(sourceID, "Play_TestSignal");
+                testsignal = true;
+                tone = false;
+            }
+            if (ImGui::Button("White Noise"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            {
+                SoundEngine::SetState("TestSignal", "White");
+                SoundEngine::PostEvent(sourceID, "Stop_TestSignal");
+                SoundEngine::PostEvent(sourceID, "Play_TestSignal");
+                testsignal = true;
+                tone = false;
+            }
+            if (ImGui::Button("Tone"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            {
+                SoundEngine::SetState("TestSignal", "Tone");
+                SoundEngine::PostEvent(sourceID, "Stop_TestSignal");
+                SoundEngine::PostEvent(sourceID, "Play_TestSignal");
+                testsignal = true;
+                tone = true;
+            }
+            if (ImGui::Button("Toggle"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            {
+                testsignal = !testsignal;
+                if (testsignal)
+                {
+                    SoundEngine::PostEvent(sourceID, "Play_TestSignal");
+                }
+                else
+                {
+                    SoundEngine::PostEvent(sourceID, "Stop_TestSignal");
+                }
             }
 
             ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
+            //ImGui::Text("counter = %d", counter);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
             ImGui::End();
         }
-
+#if 0
         // 3. Show another simple window.
         if (show_another_window)
         {
@@ -156,12 +195,12 @@ int main(int, char**)
         ImGui::Render();
         g_Renderer.SetViewMatrix(camera.GetCameraMatrix());
         g_Renderer.drawFrame();
-        g_SoundEngine.RenderAudio();
+        SoundEngine::RenderAudio();
     }
 
     // Terminating Wwise
-    g_SoundEngine.TermWwiseComm();
-    g_SoundEngine.TermWwise();
+    SoundEngine::TermWwiseComm();
+    SoundEngine::TermWwise();
     
     // Cleanup
     g_Renderer.deviceWaitIdle();

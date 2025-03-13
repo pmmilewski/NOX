@@ -7,10 +7,12 @@
 #include <AK/SoundEngine/Common/AkSoundEngine.h>
 #include <AK/SoundEngine/Common/AkStreamMgrModule.h>
 #include <AK/Comm/AkCommunication.h>
+#include <AK/Plugin/AkToneSourceFactory.h>
 
 #include "AkDefaultIOHookDeferred.h"
 
 CAkDefaultIOHookDeferred g_blockingDevice;
+uint64_t WwiseIntegration::GameObjectId = 0;
 
 namespace AK
 {
@@ -74,12 +76,19 @@ void WwiseIntegration::TermWwiseComm()
     AK::Comm::Term();
 }
 
-void WwiseIntegration::PlayEvent()
+void WwiseIntegration::PostEvent(uint64_t gameObject, std::string event)
 {
-    AkGameObjectID gameObjectID = 1;
-    AK::SoundEngine::RegisterGameObj(gameObjectID, "GameObject1");
-    AK::SoundEngine::PostEvent(AKTEXT("Play_SFX_1"), gameObjectID);
-    AK::SoundEngine::UnregisterGameObj(gameObjectID);
+    AK::SoundEngine::PostEvent(event.data(), gameObject);
+}
+
+void WwiseIntegration::SetState(std::string stateGroup, std::string state)
+{
+    AK::SoundEngine::SetState(stateGroup.data(), state.data());
+}
+
+void WwiseIntegration::SetParameter(uint64_t gameObject, std::string parameter, float value)
+{
+    AK::SoundEngine::SetRTPCValue(parameter.data(), value, gameObject);
 }
 
 void WwiseIntegration::RenderAudio()

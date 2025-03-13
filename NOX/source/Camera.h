@@ -1,6 +1,9 @@
 #pragma once
 #include <glm/glm.hpp>
 
+#include "GameObject.h"
+#include "WwiseIntegration.h"
+
 constexpr float YAW = -90.0f;
 constexpr float PITCH = 0.0f;
 constexpr float ZOOM = 45.0f;
@@ -19,7 +22,7 @@ public:
         float upX = 0.0f, float upY = 1.0f, float upZ = 0.0f,
         float yaw = YAW, float pitch = PITCH);
 
-    virtual ~Camera() = default;
+    virtual ~Camera();
     
     glm::vec3 Position;
     glm::vec3 Front;
@@ -27,6 +30,7 @@ public:
     glm::vec3 Right;
     glm::vec3 WorldUp;
     glm::mat4 View;
+    AkGameObjectID DefaultListener;
 
     float Yaw;
     float Pitch;
@@ -45,6 +49,7 @@ public:
     void SetMovementSpeed(float newValue);
     void SetRotationSpeed(float newValue);
     void SetZoomSpeed(float newValue);
+    void CreateListener();
 
 protected:
     void UpdateCameraState();

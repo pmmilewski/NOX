@@ -1117,6 +1117,12 @@ void VulkanRenderer::createStaticGameObjectsData()
 					glm::vec4 pos = {vertex.pos, 1.0f};
 					vertex.pos = glm::vec3(object.GetTransform() * pos);
 					vertex.color = object.GetColor();
+					if (object.GetOriented() && i >= cubeVertices/2)
+					{
+						vertex.color = {std::clamp(1.0f - vertex.color.x, 0.0f, 1.0f),
+							std::clamp(1.0f - vertex.color.y * 2.0f, 0.0f, 1.0f),
+							std::clamp(1.0f - vertex.color.z * 2.0f, 0.0f, 1.0f)};
+					}
 					vertex.texCoord *= object.GetTexCoordScale();
 					staticObjectsVertices[i + vertexOffset] = vertex;
 				}
