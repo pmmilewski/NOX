@@ -5,4 +5,6 @@ Project created to play with implementation of Wwise integration, DSP, Vulkan re
 Still some groundwork. Created simple room and configurable test signal source in the middle to mimic acoustic measurements environment. Geometry is fake yet, only visuals.
 Going to play with Ak geometry, DSP and visualization of the signal.
 
+[Caution] Lound test signals in video :)
+
 https://github.com/user-attachments/assets/149d10aa-8fdc-474d-aea2-ce60a88c9aaf
